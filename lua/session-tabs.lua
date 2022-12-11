@@ -8,12 +8,14 @@ M = {}
 
 local defaultConfig = {
     sessionsPath = "~/.local/share/nvim/session-tabs",
-    bufFilter = { "component://", "nvim-ide-log://" }
+    bufFilter = { "component://", "nvim-ide-log://" },
+    telescopeOpts = require('telescope.themes').get_dropdown {}
 }
 
 local config = {
     sessionsPath = nil,
     bufFilter = nil,
+    telescopeOpts = nil
 }
 
 local function scandir(directory)
@@ -116,7 +118,7 @@ M.selectSession = function()
         return ret
     end
 
-    pickers.new(require('telescope.themes').get_dropdown {}, {
+    pickers.new(config.telescopeOpts, {
         prompt_title = "Sessions",
         finder = finders.new_table {
             results = sessionNames()
@@ -202,6 +204,52 @@ M.saveSession = function()
     os.remove(sessionPath .. ".tmp")
     handle:flush()
     handle:close()
+end
+
+M.deleteSession = function()
+    local sessions = getSessions()
+
+    local opts = config.telescopeOpts or {}
+
+    local sessionNames = function()
+        local ret = {}
+        for k, _ in pairs(sessions) do
+            table.insert(ret, k)
+        end
+
+        return ret
+    end
+
+    pickers.new(config.telescopeOpts, {
+        prompt_title = "Sessions",
+        finder = finders.new_table {
+            results = sessionNames()
+        },
+        sorter = conf.generic_sorter(opts),
+        attach_mappings = function(prompt_bufnr, _)
+            actions.select_default:replace(function()
+                actions.close(prompt_bufnr)
+
+                local selection = action_state.get_selected_entry()
+
+                if selection == nil or selection == "" then
+                    return
+                end
+
+                local success, err = os.remove(sessions[selection[1]].path)
+                if err ~= nil then
+                    vim.notify("Could not delete session: " .. err, vim.log.levels.ERROR)
+                    return
+                end
+
+                if not success then
+                    vim.notify("Could not delete session: unknown error", vim.log.levels.ERROR)
+                end
+            end)
+
+            return true
+        end
+    }):find()
 end
 
 M.setup = function(setupConfig)
