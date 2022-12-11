@@ -7,15 +7,17 @@ local conf = require("telescope.config").values
 M = {}
 
 local defaultConfig = {
-    sessionsPath = "~/.local/share/nvim/session-tabs",
-    bufFilter = { "component://", "nvim-ide-log://" },
-    telescopeOpts = require('telescope.themes').get_dropdown {}
+    sessions_path = "~/.local/share/nvim/session-tabs",
+    buf_filter = { "component://", "nvim-ide-log://" },
+    telescope_opts = require('telescope.themes').get_dropdown {},
+    save_cwd = true
 }
 
 local config = {
-    sessionsPath = nil,
-    bufFilter = nil,
-    telescopeOpts = nil
+    sessions_path = nil,
+    buf_filter = nil,
+    telescope_opts = nil,
+    save_cwd = nil
 }
 
 local function scandir(directory)
@@ -74,6 +76,7 @@ end
 local function getSessionData(file)
     local name
     local time
+    local cwd
     for line in io.lines(file) do
         if string.find(line, '^" name:') then
             name = string.gsub(line, '" name:', "")
@@ -81,9 +84,14 @@ local function getSessionData(file)
         if string.find(line, '^" time:') then
             time = string.gsub(line, '" time:', "")
         end
+        if config.save_cwd then
+            if string.find(line, '^" cwd:') then
+                cwd = string.gsub(line, '" cwd:', "")
+            end
+        end
     end
 
-    return name, time
+    return name, time, cwd
 end
 
 local function getSessions()
@@ -92,11 +100,12 @@ local function getSessions()
     local ret = {}
 
     for _, v in ipairs(files) do
-        local name, time = getSessionData(config.sessionsPath .. "/" .. v)
+        local name, time, cwd = getSessionData(config.sessionsPath .. "/" .. v)
 
         ret[name] = {
             time = time,
-            path = config.sessionsPath .. "/" .. v
+            path = config.sessionsPath .. "/" .. v,
+            cwd = cwd
         }
     end
 
@@ -136,6 +145,9 @@ M.selectSession = function()
 
                 vim.cmd("tabnew")
                 vim.cmd("source " .. sessions[selection[1]].path)
+                if config.save_cwd then
+                    vim.cmd("tcd " .. sessions[selection[1]].cwd)
+                end
             end)
 
             return true
@@ -193,6 +205,9 @@ M.saveSession = function()
     -- save a little meta data so we can present a nice list later
     handle:write('" name:' .. name .. "\n")
     handle:write('" time:' .. os.time() .. "\n")
+    if config.save_cwd then
+        handle:write('" cwd:' .. vim.fn.getcwd() .. "\n")
+    end
 
     for _, line in ipairs(finalFile) do
         if not string.find(line, "$argadd") then
