@@ -112,6 +112,25 @@ local function getSessions()
     return ret
 end
 
+local function tabIsEmpty()
+    local wins = vim.api.nvim_tabpage_list_wins()
+
+    if #wins == 1 then
+        local buf = vim.api.nvim_win_get_buf(wins[1])
+
+        local bufInfo = vim.fn.getbufinfo(buf)
+
+        if bufInfo.name == "" and
+            not bufInfo.changed and
+            bufInfo.linecount == 1 then
+            return true
+        end
+
+        return false
+    end
+    return false
+end
+
 -- our picker function: colors
 M.selectSession = function()
     local sessions = getSessions()
@@ -143,7 +162,9 @@ M.selectSession = function()
                     return
                 end
 
-                vim.cmd("tabnew")
+                if not tabIsEmpty() then
+                    vim.cmd("tabnew")
+                end
                 vim.cmd("source " .. sessions[selection[1]].path)
                 if config.save_cwd then
                     vim.cmd("tcd " .. sessions[selection[1]].cwd)
