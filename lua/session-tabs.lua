@@ -112,6 +112,18 @@ local function getSessions()
     return ret
 end
 
+local function nameExists(name)
+    local sessions = getSessions()
+
+    for k, _ in pairs(sessions) do
+        if k == name then
+            return true
+        end
+    end
+
+    return false
+end
+
 local function tabIsEmpty()
     local wins = vim.api.nvim_tabpage_list_wins()
 
@@ -174,18 +186,6 @@ M.selectSession = function()
             return true
         end
     }):find()
-end
-
-local function nameExists(name)
-    local sessions = getSessions()
-
-    for k, _ in pairs(sessions) do
-        if k == name then
-            return true
-        end
-    end
-
-    return false
 end
 
 M.saveSession = function()
