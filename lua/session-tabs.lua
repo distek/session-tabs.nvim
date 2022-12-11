@@ -290,14 +290,13 @@ M.setup = function(setupConfig)
         config = vim.deepcopy(setupConfig)
     end
 
+    config.sessions_path = vim.fn.expand(config.sessions_path)
+
     if config.sessions_path == "" then
         vim.notify("Do not unset sessions path (you _can_ change it to whatever you want, but have it be a path where your user can write)"
             ,
             vim.log.levels.ERROR)
     end
-
-
-    config.sessions_path = vim.fn.expand(config.sessions_path)
 end
 
 return M
