@@ -224,15 +224,9 @@ end
 M.deleteSession = function()
     local sessions = getSessions()
 
-    local opts = config.telescopeOpts or {}
-
-    local sessionNames = function()
-        local ret = {}
-        for k, _ in pairs(sessions) do
-            table.insert(ret, k)
-        end
-
-        return ret
+    local sessionNames = {}
+    for k, _ in pairs(sessions) do
+        table.insert(sessionNames, k)
     end
 
     local opts = config.telescope_opts or {}
@@ -240,7 +234,7 @@ M.deleteSession = function()
     pickers.new(config.telescope_opts, {
         prompt_title = "Sessions",
         finder = finders.new_table {
-            results = sessionNames()
+            results = sessionNames
         },
         sorter = conf.generic_sorter(opts),
         attach_mappings = function(prompt_bufnr, _)
