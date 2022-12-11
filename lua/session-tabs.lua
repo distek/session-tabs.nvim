@@ -125,16 +125,16 @@ local function nameExists(name)
 end
 
 local function tabIsEmpty()
-    local wins = vim.api.nvim_tabpage_list_wins()
+    local wins = vim.api.nvim_tabpage_list_wins(0)
 
     if #wins == 1 then
         local buf = vim.api.nvim_win_get_buf(wins[1])
 
         local bufInfo = vim.fn.getbufinfo(buf)
 
-        if bufInfo.name == "" and
-            not bufInfo.changed and
-            bufInfo.linecount == 1 then
+        if bufInfo[1].name == "" and
+            bufInfo[1].changed == 0 and
+            bufInfo[1].linecount == 1 then
             return true
         end
 
