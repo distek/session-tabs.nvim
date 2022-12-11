@@ -181,6 +181,10 @@ M.selectSession = function()
                 if config.save_cwd then
                     vim.cmd("tcd " .. sessions[selection[1]].cwd)
                 end
+
+                if package.loaded['tabline'] then
+                    require('tabline').tab_rename(selection[1])
+                end
             end)
 
             return true
