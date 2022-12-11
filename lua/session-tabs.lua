@@ -53,8 +53,8 @@ local function filterBuffers(name)
         return false
     end
 
-    -- filter based on config.bufFilter
-    for _, f in ipairs(config.bufFilter) do
+    -- filter based on config.buf_filter
+    for _, f in ipairs(config.buf_filter) do
         if string.find(name, f, 0, true) ~= nil then
             return false
         end
@@ -95,16 +95,16 @@ local function getSessionData(file)
 end
 
 local function getSessions()
-    local files = scandir(config.sessionsPath .. "/")
+    local files = scandir(config.sessions_path .. "/")
 
     local ret = {}
 
     for _, v in ipairs(files) do
-        local name, time, cwd = getSessionData(config.sessionsPath .. "/" .. v)
+        local name, time, cwd = getSessionData(config.sessions_path .. "/" .. v)
 
         ret[name] = {
             time = time,
-            path = config.sessionsPath .. "/" .. v,
+            path = config.sessions_path .. "/" .. v,
             cwd = cwd
         }
     end
@@ -116,7 +116,7 @@ end
 M.selectSession = function()
     local sessions = getSessions()
 
-    local opts = config.telescopeOpts or {}
+    local opts = config.telescope_opts or {}
 
     local sessionNames = function()
         local ret = {}
@@ -127,7 +127,7 @@ M.selectSession = function()
         return ret
     end
 
-    pickers.new(config.telescopeOpts, {
+    pickers.new(config.telescope_opts, {
         prompt_title = "Sessions",
         finder = finders.new_table {
             results = sessionNames()
@@ -182,7 +182,7 @@ M.saveSession = function()
         return
     end
 
-    local sessionPath = config.sessionsPath .. "/" .. name .. ".vim"
+    local sessionPath = config.sessions_path .. "/" .. name .. ".vim"
 
     vim.cmd("mksession " .. sessionPath .. ".tmp")
 
@@ -235,7 +235,9 @@ M.deleteSession = function()
         return ret
     end
 
-    pickers.new(config.telescopeOpts, {
+    local opts = config.telescope_opts or {}
+
+    pickers.new(config.telescope_opts, {
         prompt_title = "Sessions",
         finder = finders.new_table {
             results = sessionNames()
@@ -273,7 +275,14 @@ M.setup = function(setupConfig)
         config = vim.deepcopy(setupConfig)
     end
 
-    config.sessionsPath = vim.fn.expand(config.sessionsPath)
+    if config.sessions_path == "" then
+        vim.notify("Do not unset sessions path (you _can_ change it to whatever you want, but have it be a path where your user can write)"
+            ,
+            vim.log.levels.ERROR)
+    end
+
+
+    config.sessions_path = vim.fn.expand(config.sessions_path)
 end
 
 return M
