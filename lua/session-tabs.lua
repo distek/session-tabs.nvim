@@ -173,13 +173,17 @@ M.selectSession = function()
                 if not tabIsEmpty() then
                     vim.cmd("tabnew")
                 end
+
                 vim.cmd("source " .. sessions[selection[1]].path)
+
                 if config.save_cwd then
                     vim.cmd("tcd " .. sessions[selection[1]].cwd)
                 end
 
                 if package.loaded['tabline'] then
                     require('tabline').tab_rename(selection[1])
+                elseif package.loaded['lualine'] then
+                    vim.cmd('LualineRenameTab ' .. selection[1])
                 end
             end)
 
