@@ -6,18 +6,20 @@ local conf = require("telescope.config").values
 
 M = {}
 
-local defaultConfig = {
-    sessions_path = "~/.local/share/nvim/session-tabs",
-    buf_filter = { "component://", "nvim-ide-log://" },
-    telescope_opts = require('telescope.themes').get_dropdown {},
-    save_cwd = true
-}
-
 local config = {
     sessions_path = nil,
     buf_filter = nil,
     telescope_opts = nil,
+    rename_tab = nil,
     save_cwd = nil
+}
+
+local defaultConfig = {
+    sessions_path = "~/.local/share/nvim/session-tabs",
+    buf_filter = { "component://", "nvim-ide-log://" },
+    telescope_opts = require('telescope.themes').get_dropdown {},
+    rename_tab = "none",
+    save_cwd = true
 }
 
 local function scandir(directory)
@@ -180,10 +182,14 @@ M.selectSession = function()
                     vim.cmd("tcd " .. sessions[selection[1]].cwd)
                 end
 
-                if package.loaded['tabline'] then
-                    require('tabline').tab_rename(selection[1])
-                elseif package.loaded['lualine'] then
-                    vim.cmd('LualineRenameTab ' .. selection[1])
+                if config.rename_tab ~= nil and config.rename_tab ~= "none" then
+                    if config.rename_tab == "tabline" then
+                        require('tabline').tab_rename(selection[1])
+                    elseif config.rename_tab == "lualine" then
+                        vim.cmd('LualineRenameTab ' .. selection[1])
+                    elseif config.rename_tab == "bufferline" then -- pending: https://github.com/akinsho/bufferline.nvim/pull/635
+                        vim.cmd('BufferLineRenameTab ' .. selection[1])
+                    end
                 end
             end)
 
