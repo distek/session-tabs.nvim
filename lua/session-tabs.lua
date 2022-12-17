@@ -297,26 +297,26 @@ end
 M.setup = function(setupConfig)
     config = vim.deepcopy(defaultConfig)
     if setupConfig ~= nil then
-        if setupConfig.sessions_path == nil then
+        if setupConfig.sessions_path ~= nil then
             config.sessions_path = setupConfig.sessions_path
         end
-        if setupConfig.buf_filter == nil then
+        if setupConfig.buf_filter ~= nil then
             config.buf_filter = setupConfig.buf_filter
         end
-        if setupConfig.telescope_opts == nil then
+        if setupConfig.telescope_opts ~= nil then
             config.telescope_opts = setupConfig.telescope_opts
         end
-        if setupConfig.rename_tab == nil then
+        if setupConfig.rename_tab ~= nil then
             config.rename_tab = setupConfig.rename_tab
         end
-        if setupConfig.save_cwd == nil then
+        if setupConfig.save_cwd ~= nil then
             config.save_cwd = setupConfig.save_cwd
         end
     end
 
     config.sessions_path = vim.fn.expand(config.sessions_path)
 
-    if config.sessions_path == "" then
+    if config.sessions_path == nil or config.sessions_path == "" then
         vim.notify("Do not unset sessions path (you _can_ change it to whatever you want, but have it be a path where your user can write)"
             ,
             vim.log.levels.ERROR)
